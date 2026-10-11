@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f7f5f1;
+  --paper-raised: #ffffff;
+  --ink: #17181c;
+  --ink-soft: #4a4d53;
+  --line: #e3e0d8;
+  --line-strong: #cfcbc0;
+  --silver-100: #f1f1ef;
+  --silver-300: #cfd1d2;
+  --silver-500: #9a9ea3;
+  --silver-700: #63666b;
+  --silver-900: #2c2e32;
+  --charcoal: #1c1e22;
+
+  /* Plum: sampled directly from the brand logo. Used as a sparing accent
+     (links, availability tag, price). Never as a gradient or button fill. */
+  --plum-50: #f7eef9;
+  --plum-100: #ecd9f0;
+  --plum-300: #b06fc4;
+  --plum-600: #5b2170;
+  --plum-700: #4b1a5c;
+  --plum-900: #2e1038;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-silver-100: var(--silver-100);
+  --color-silver-300: var(--silver-300);
+  --color-silver-500: var(--silver-500);
+  --color-silver-700: var(--silver-700);
+  --color-silver-900: var(--silver-900);
+  --color-charcoal: var(--charcoal);
+  --color-plum-50: var(--plum-50);
+  --color-plum-100: var(--plum-100);
+  --color-plum-300: var(--plum-300);
+  --color-plum-600: var(--plum-600);
+  --color-plum-700: var(--plum-700);
+  --color-plum-900: var(--plum-900);
+  --font-display: var(--font-display-serif);
+  --font-body: var(--font-inter);
+  --animate-accordion-down: accordion-down 0.25s ease-out;
+  --animate-accordion-up: accordion-up 0.25s ease-out;
+  --animate-marquee: marquee var(--duration, 40s) linear infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration, 40s) linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--silver-900);
+  color: var(--paper);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
