@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart/CartContext";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { placeOrderAction } from "./actions";
 import { formatPrice, PAYMENT, SITE } from "@/lib/content";
 import { ButtonLink } from "@/components/Button";
 import EmptyState from "@/components/EmptyState";
@@ -95,33 +96,28 @@ export default function CheckoutPage() {
 
       const paymentMethod: PaymentChoice = hasCustomItem ? "Bank/Wallet" : paymentChoice;
 
-      const { data, error: insertError } = await db
-        .from("orders")
-        .insert({
-          customer_name: name.trim(),
-          customer_phone: phone.trim(),
-          shipping_address: address.trim(),
-          items: items.map((i) => ({
-            product_id: i.productId,
-            name: i.name,
-            price: i.price,
-            qty: i.qty,
-            is_custom: i.isCustom,
-          })),
-          total_price: subtotal,
-          amount_paid_now: amountPaidNow,
-          remaining_balance: remainingBalance,
-          payment_method: paymentMethod,
-          screenshot_url: screenshotPath,
-          status: "awaiting_verification",
-        })
-        .select("order_number")
-        .single();
+      const result = await placeOrderAction({
+        customerName: name.trim(),
+        customerPhone: phone.trim(),
+        shippingAddress: address.trim(),
+        items: items.map((i) => ({
+          product_id: i.productId,
+          name: i.name,
+          price: i.price,
+          qty: i.qty,
+          is_custom: i.isCustom,
+        })),
+        totalPrice: subtotal,
+        amountPaidNow,
+        remainingBalance,
+        paymentMethod,
+        screenshotPath,
+      });
 
-      if (insertError) throw new Error(`Could not place order: ${insertError.message}`);
+      if ("error" in result) throw new Error(result.error);
 
       clear();
-      setOrderNumber((data as { order_number: number }).order_number);
+      setOrderNumber(result.orderNumber);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
