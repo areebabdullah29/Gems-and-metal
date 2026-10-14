@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NAV_LINKS, SITE } from "@/lib/content";
 import { useCart } from "@/lib/cart/CartContext";
 
@@ -12,6 +12,8 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [lastPathname, setLastPathname] = useState(pathname);
   const [scrolled, setScrolled] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerRef = useRef<HTMLElement>(null);
   const { itemCount } = useCart();
 
   const isHome = pathname === "/";
@@ -42,9 +44,21 @@ export default function Header() {
     };
   }, [isHome]);
 
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const measure = () => setHeaderHeight(el.offsetHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [menuOpen]);
+
   return (
-    <header
-      className={`sticky top-0 z-40 border-b transition-colors duration-500 ${
+    <>
+      <header
+        ref={headerRef}
+        className={`fixed inset-x-0 top-0 z-40 border-b transition-colors duration-500 ${
         transparentMode
           ? "border-transparent bg-transparent"
           : "border-line bg-paper/90 backdrop-blur"
@@ -57,8 +71,8 @@ export default function Header() {
             alt={SITE.name}
             width={40}
             height={40}
-            className={`h-10 w-10 object-contain transition-[filter] duration-500 ${
-              transparentMode ? "brightness-0 invert" : ""
+            className={`h-10 w-10 rounded-full object-contain transition-shadow duration-500 ${
+              transparentMode ? "shadow-[0_0_0_1px_rgba(255,255,255,0.4)]" : ""
             }`}
             priority
           />
@@ -140,6 +154,11 @@ export default function Header() {
           ))}
         </nav>
       )}
-    </header>
+      </header>
+      {/* The header is `fixed` so it can overlay the homepage hero from the
+          very first pixel. Everywhere else (and once the hero is scrolled
+          past) this spacer reserves the space it would otherwise cover. */}
+      {!transparentMode && <div style={{ height: headerHeight }} aria-hidden="true" />}
+    </>
   );
 }
