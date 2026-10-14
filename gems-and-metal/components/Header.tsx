@@ -68,7 +68,7 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/brand/logo.png"
-            alt={SITE.name}
+            alt=""
             width={40}
             height={40}
             className={`h-10 w-10 rounded-full object-contain transition-shadow duration-500 ${
@@ -76,6 +76,13 @@ export default function Header() {
             }`}
             priority
           />
+          <span
+            className={`font-display text-lg tracking-wide transition-colors duration-500 ${
+              transparentMode ? "text-paper" : "text-ink"
+            }`}
+          >
+            {SITE.name}
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-10 md:flex">
