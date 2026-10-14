@@ -100,3 +100,45 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
   const { error } = await db.from("orders").update({ status }).eq("id", id);
   if (error) throw new Error(`Failed to update order: ${error.message}`);
 }
+
+export interface CreateOrderInput {
+  customerName: string;
+  customerPhone: string;
+  shippingAddress: string;
+  items: OrderItem[];
+  totalPrice: number;
+  amountPaidNow: number;
+  remainingBalance: number;
+  paymentMethod: PaymentMethod;
+  screenshotPath: string | null;
+}
+
+/**
+ * Runs with the service role, bypassing RLS entirely. The public anon key
+ * intentionally has no SELECT policy on orders (so one customer can't read
+ * another's name/phone/address), which means a client-side
+ * `.insert().select()` fails under RLS even though the insert itself would
+ * be allowed — Postgres requires the inserted row be visible to RETURN it.
+ * Routing order creation through this server-only function sidesteps that.
+ */
+export async function createOrder(input: CreateOrderInput): Promise<number> {
+  const db = supabaseAdmin();
+  const { data, error } = await db
+    .from("orders")
+    .insert({
+      customer_name: input.customerName,
+      customer_phone: input.customerPhone,
+      shipping_address: input.shippingAddress,
+      items: input.items,
+      total_price: input.totalPrice,
+      amount_paid_now: input.amountPaidNow,
+      remaining_balance: input.remainingBalance,
+      payment_method: input.paymentMethod,
+      screenshot_url: input.screenshotPath,
+      status: "awaiting_verification",
+    })
+    .select("order_number")
+    .single();
+  if (error) throw new Error(`Could not place order: ${error.message}`);
+  return (data as { order_number: number }).order_number;
+}
