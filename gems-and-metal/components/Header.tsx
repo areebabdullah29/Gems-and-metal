@@ -65,23 +65,32 @@ export default function Header() {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:px-10">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-4">
           <Image
             src="/brand/logo.png"
             alt=""
-            width={40}
-            height={40}
-            className={`h-10 w-10 rounded-full object-contain transition-shadow duration-500 ${
+            width={44}
+            height={44}
+            className={`h-11 w-11 shrink-0 rounded-full object-contain transition-shadow duration-500 ${
               transparentMode ? "shadow-[0_0_0_1px_rgba(255,255,255,0.4)]" : ""
             }`}
             priority
           />
-          <span
-            className={`font-display text-lg tracking-wide transition-colors duration-500 ${
-              transparentMode ? "text-paper" : "text-ink"
-            }`}
-          >
-            {SITE.name}
+          <span className="flex flex-col leading-none">
+            <span
+              className={`font-display text-xl uppercase tracking-[0.06em] transition-colors duration-500 sm:text-2xl md:text-[32px] ${
+                transparentMode ? "text-paper" : "text-ink"
+              }`}
+            >
+              {SITE.name}
+            </span>
+            <span
+              className={`mt-1.5 hidden text-[10px] uppercase tracking-[0.25em] transition-colors duration-500 sm:block ${
+                transparentMode ? "text-paper/70" : "text-ink-soft"
+              }`}
+            >
+              Sterling Silver &middot; {SITE.since}
+            </span>
           </span>
         </Link>
 
