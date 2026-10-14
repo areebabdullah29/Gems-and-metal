@@ -6,6 +6,7 @@ import { getProductBySlug, listProducts } from "@/lib/products";
 import { formatPrice, SITE } from "@/lib/content";
 import Reveal from "@/components/Reveal";
 import ProductCard from "@/components/ProductCard";
+import AddToCartButton from "@/components/AddToCartButton";
 
 export async function generateMetadata({
   params,
@@ -30,10 +31,15 @@ export default async function ProductPage({
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const allProducts = await listProducts();
-  const related = allProducts
-    .filter((p) => p.id !== product.id && p.category === product.category)
-    .slice(0, 3);
+  let related: Awaited<ReturnType<typeof listProducts>> = [];
+  try {
+    const allProducts = await listProducts();
+    related = allProducts
+      .filter((p) => p.id !== product.id && p.category === product.category)
+      .slice(0, 3);
+  } catch (err) {
+    console.error("Failed to load related products:", err);
+  }
 
   const enquirySubject = encodeURIComponent(`Enquiry: ${product.name}`);
   const enquiryBody = encodeURIComponent(
@@ -91,21 +97,29 @@ export default async function ProductPage({
                   {product.availability === "in_stock" ? "In Stock" : "Made to Order"}
                 </dd>
               </div>
+              {product.isCustom && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-ink-soft">Custom Order</dt>
+                  <dd className="text-end text-ink">50% advance payment required</dd>
+                </div>
+              )}
             </dl>
+
+            <AddToCartButton product={product} />
 
             {SITE.contactEmail ? (
               <a
                 href={`mailto:${SITE.contactEmail}?subject=${enquirySubject}&body=${enquiryBody}`}
-                className="mt-10 inline-flex w-fit items-center justify-center gap-2 bg-ink px-7 py-3 text-xs uppercase tracking-[0.18em] text-paper transition-colors hover:bg-silver-900"
+                className="mt-4 inline-flex w-fit items-center justify-center gap-2 border border-ink px-7 py-3 text-xs uppercase tracking-[0.18em] text-ink transition-colors hover:border-plum-700 hover:text-plum-700"
               >
-                Enquire About This Piece
+                Ask a Question
               </a>
             ) : (
               <Link
                 href="/contact"
-                className="mt-10 inline-flex w-fit items-center justify-center gap-2 bg-ink px-7 py-3 text-xs uppercase tracking-[0.18em] text-paper transition-colors hover:bg-silver-900"
+                className="mt-4 inline-flex w-fit items-center justify-center gap-2 border border-ink px-7 py-3 text-xs uppercase tracking-[0.18em] text-ink transition-colors hover:border-plum-700 hover:text-plum-700"
               >
-                Enquire About This Piece
+                Ask a Question
               </Link>
             )}
           </div>

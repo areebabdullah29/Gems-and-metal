@@ -15,6 +15,12 @@ export default function Dashboard({ products }: { products: Product[] }) {
         </div>
         <div className="flex items-center gap-4">
           <Link
+            href="/admin/orders"
+            className="text-xs uppercase tracking-[0.15em] text-ink-soft hover:text-ink"
+          >
+            Orders
+          </Link>
+          <Link
             href="/"
             target="_blank"
             className="text-xs uppercase tracking-[0.15em] text-ink-soft hover:text-ink"
@@ -74,6 +80,7 @@ export default function Dashboard({ products }: { products: Product[] }) {
                   <p className="text-xs text-ink-soft">
                     {product.category} · {formatPrice(product.price)} ·{" "}
                     {product.availability === "in_stock" ? "In Stock" : "Made to Order"}
+                    {product.isCustom && " · Custom (50% advance)"}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-5">
