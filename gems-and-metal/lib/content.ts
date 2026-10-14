@@ -15,6 +15,17 @@ export const SITE = {
   instagramUrl: "",
 };
 
+// Bank/wallet details shown at checkout for manual advance payments.
+// Fill these in before launch — left blank rather than filled with placeholders.
+export const PAYMENT = {
+  bankAccountTitle: "",
+  bankAccountNumber: "",
+  bankName: "",
+  raastId: "",
+  easypaisaNumber: "",
+  jazzcashNumber: "",
+};
+
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },

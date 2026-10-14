@@ -45,3 +45,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Stitch CLI capture artifacts and scratch downloads (regenerable, not source)
+/.stitch/
+/.stitch-dashboard/
+.stitch.json

@@ -15,6 +15,7 @@ import {
   type Availability,
   type ProductInput,
 } from "@/lib/products";
+import { updateOrderStatus, type OrderStatus } from "@/lib/orders";
 
 export interface FormState {
   error: string | null;
@@ -60,6 +61,7 @@ function parseProductInput(formData: FormData): ProductInput | { error: string }
   const material = String(formData.get("material") ?? "").trim();
   const availability = String(formData.get("availability") ?? "in_stock") as Availability;
   const description = String(formData.get("description") ?? "").trim();
+  const isCustom = formData.get("isCustom") === "on";
 
   if (!name) return { error: "Product name is required." };
 
@@ -71,7 +73,7 @@ function parseProductInput(formData: FormData): ProductInput | { error: string }
   if (!category) return { error: "Category is required." };
   if (!material) return { error: "Material is required." };
 
-  return { name, price, category, material, availability, description };
+  return { name, price, category, material, isCustom, availability, description };
 }
 
 export async function createProductAction(
@@ -88,7 +90,12 @@ export async function createProductAction(
   const imageFile = formData.get("image");
   const image = imageFile instanceof File && imageFile.size > 0 ? imageFile : null;
 
-  await createProduct(parsed, image);
+  try {
+    await createProduct(parsed, image);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to create product." };
+  }
+
   revalidatePath("/admin");
   revalidatePath("/shop");
   revalidatePath("/");
@@ -110,7 +117,12 @@ export async function updateProductAction(
   const imageFile = formData.get("image");
   const image = imageFile instanceof File && imageFile.size > 0 ? imageFile : null;
 
-  const updated = await updateProduct(id, parsed, image);
+  let updated;
+  try {
+    updated = await updateProduct(id, parsed, image);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to update product." };
+  }
   if (!updated) return { error: "Product not found." };
 
   revalidatePath("/admin");
@@ -129,4 +141,13 @@ export async function deleteProductAction(id: string): Promise<void> {
   revalidatePath("/shop");
   revalidatePath("/");
   redirect("/admin");
+}
+
+export async function setOrderStatusAction(id: string, status: OrderStatus): Promise<void> {
+  if (!(await isAuthenticated())) {
+    redirect("/admin");
+  }
+  await updateOrderStatus(id, status);
+  revalidatePath("/admin/orders");
+  redirect("/admin/orders");
 }

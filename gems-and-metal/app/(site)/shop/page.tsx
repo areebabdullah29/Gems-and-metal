@@ -15,7 +15,15 @@ export default async function ShopPage({
   searchParams: Promise<{ category?: string }>;
 }) {
   const { category } = await searchParams;
-  const [allProducts, categories] = await Promise.all([listProducts(), listCategories()]);
+
+  let allProducts: Awaited<ReturnType<typeof listProducts>> = [];
+  let categories: string[] = [];
+  try {
+    [allProducts, categories] = await Promise.all([listProducts(), listCategories()]);
+  } catch (err) {
+    console.error("Failed to load shop products:", err);
+  }
+
   const products = category
     ? allProducts.filter((p) => p.category === category)
     : allProducts;

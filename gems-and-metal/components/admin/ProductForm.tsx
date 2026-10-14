@@ -116,6 +116,22 @@ export default function ProductForm({
         </div>
       </div>
 
+      <label className="flex items-center gap-3 border border-line bg-paper-raised px-4 py-3">
+        <input
+          id="isCustom"
+          name="isCustom"
+          type="checkbox"
+          defaultChecked={product?.isCustom ?? false}
+          className="h-4 w-4"
+        />
+        <span className="text-sm text-ink">
+          Custom order
+          <span className="block text-xs text-ink-soft">
+            Requires a 50% advance payment at checkout instead of full payment up front.
+          </span>
+        </span>
+      </label>
+
       <div>
         <label htmlFor="description" className="text-xs uppercase tracking-[0.15em] text-ink-soft">
           Description

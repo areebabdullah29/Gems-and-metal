@@ -1,12 +1,11 @@
-import Image from "next/image";
-import { HeroContours, RingMotif, SectionMark } from "@/components/Decor";
+import { RingMotif, SectionMark } from "@/components/Decor";
 import { ButtonLink } from "@/components/Button";
 import Reveal from "@/components/Reveal";
 import ProductCard from "@/components/ProductCard";
 import EmptyState from "@/components/EmptyState";
 import { Marquee } from "@/components/ui/marquee";
+import CinematicHero from "@/components/CinematicHero";
 import { listProducts } from "@/lib/products";
-import { SITE } from "@/lib/content";
 
 const MARQUEE_WORDS = [
   "Pure 925 Sterling Silver",
@@ -36,62 +35,19 @@ const FACTS = [
 ];
 
 export default async function Home() {
-  const products = await listProducts();
-  const featured = products.slice(0, 4);
+  // The product grid is secondary content on this page — if Supabase isn't
+  // reachable (not configured yet, or a transient outage), the hero and
+  // the rest of the marketing page should still render instead of a hard 500.
+  let featured: Awaited<ReturnType<typeof listProducts>> = [];
+  try {
+    featured = (await listProducts()).slice(0, 4);
+  } catch (err) {
+    console.error("Failed to load featured products:", err);
+  }
 
   return (
     <>
-      <section className="relative overflow-hidden border-b border-line">
-        <HeroContours className="pointer-events-none absolute inset-0 h-full w-full opacity-70" />
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-[1.2fr_0.8fr] md:items-center md:px-10 md:py-28">
-          <div className="flex flex-col items-start">
-            <Reveal>
-              <div className="mb-5 flex flex-wrap items-center gap-3">
-                <p className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-ink-soft">
-                  <SectionMark className="text-ink-soft" /> Jewelry &amp; Watches Studio
-                </p>
-                <span className="text-xs uppercase tracking-[0.25em] text-plum-700">
-                  {SITE.since}
-                </span>
-              </div>
-            </Reveal>
-            <Reveal delay={0.08}>
-              <h1 className="max-w-xl font-display text-4xl leading-[1.08] tracking-tight text-ink md:text-5xl lg:text-[3.5rem]">
-                {SITE.tagline}
-              </h1>
-            </Reveal>
-            <Reveal delay={0.16}>
-              <p className="mt-6 max-w-md text-sm leading-relaxed text-ink-soft md:text-base">
-                {SITE.description}
-              </p>
-            </Reveal>
-            <Reveal delay={0.24}>
-              <div className="mt-10 flex flex-wrap gap-4">
-                <ButtonLink href="/shop">View the Collection</ButtonLink>
-                <ButtonLink href="/about" variant="secondary">
-                  Our Craft
-                </ButtonLink>
-              </div>
-            </Reveal>
-          </div>
-
-          <Reveal delay={0.1}>
-            <div className="relative mx-auto w-full max-w-sm">
-              <div className="absolute -bottom-4 -end-4 h-full w-full border border-plum-700/40" />
-              <div className="relative aspect-square w-full overflow-hidden border border-line-strong bg-silver-100">
-                <Image
-                  src="/brand/hero-necklace.png"
-                  alt="A model wearing a Gems and Metal sterling silver necklace"
-                  fill
-                  sizes="(min-width: 768px) 380px, 80vw"
-                  className="object-cover"
-                  priority
-                />
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      <CinematicHero />
 
       <div className="border-b border-line bg-charcoal py-4">
         <Marquee pauseOnHover className="[--gap:2.5rem]">
