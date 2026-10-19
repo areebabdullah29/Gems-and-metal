@@ -31,22 +31,12 @@ export async function POST(request: NextRequest) {
 
   const { customer_name, customer_phone, order_number } = payload.record;
 
-  // Sandbox demo: Meta's built-in "hello_world" template works with zero
-  // approval. Swap `templateName` for your own approved utility template
-  // (e.g. "order_received") and pass real bodyParams once you have one —
-  // see the commented example below.
+  // Approved English template: {{1}} is the customer name, {{2}} the order number.
   const result = await sendWhatsAppTemplate({
     to: customer_phone,
-    templateName: "hello_world",
-    languageCode: "en_US",
-
-    // Once you have an approved template with body variables, e.g.:
-    //   "Hi {{1}}! Thank you for ordering from Gems and Metal (Order #{{2}}).
-    //    We have received your payment screenshot. Our team is verifying the
-    //    transfer and will confirm your order shortly!"
-    // switch to:
-    // templateName: "order_received",
-    // bodyParams: [customer_name, String(order_number)],
+    templateName: "order_received_awaiting_verification",
+    languageCode: "en",
+    bodyParams: [customer_name, String(order_number)],
   });
 
   if (!result.ok) {
