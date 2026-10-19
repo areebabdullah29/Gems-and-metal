@@ -31,15 +31,12 @@ export async function POST(request: NextRequest) {
 
   const { customer_name, customer_phone, order_number } = payload.record;
 
-  // NOTE: this template currently has no {{1}}/{{2}} variables — it was
-  // submitted with "John Doe" / "#34567" typed as literal body text rather
-  // than placeholders, so every customer gets that same static wording
-  // until the template is edited in Meta to use real variables and
-  // resubmitted. Once it has variables, restore bodyParams below.
+  // Approved English template: {{1}} is the customer name, {{2}} the order number.
   const result = await sendWhatsAppTemplate({
     to: customer_phone,
     templateName: "order_received_awaiting_verification",
     languageCode: "en",
+    bodyParams: [customer_name, String(order_number)],
   });
 
   if (!result.ok) {
