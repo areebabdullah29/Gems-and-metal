@@ -96,6 +96,7 @@ export default async function AdminOrdersPage({
                       <div key={idx} className="flex justify-between">
                         <span className="text-ink-soft">
                           {item.name} &times; {item.qty}
+                          {item.size && <span className="ms-2 text-xs">(Size: {item.size})</span>}
                           {item.is_custom && (
                             <span className="ms-2 text-xs text-plum-700">(custom)</span>
                           )}

@@ -33,7 +33,7 @@ export default function CartPage() {
 
       <div className="mt-10 flex flex-col divide-y divide-line border-y border-line">
         {items.map((item) => (
-          <div key={item.productId} className="flex items-center gap-4 py-5">
+          <div key={`${item.productId}-${item.size ?? ""}`} className="flex items-center gap-4 py-5">
             <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-silver-100">
               {item.image && (
                 <Image src={item.image} alt={item.name} fill className="object-cover" />
@@ -43,6 +43,9 @@ export default function CartPage() {
               <Link href={`/shop/${item.slug}`} className="font-display text-base text-ink hover:text-plum-700">
                 {item.name}
               </Link>
+              {item.size && (
+                <p className="mt-1 text-xs text-ink-soft">Size: {item.size}</p>
+              )}
               {item.isCustom && (
                 <p className="mt-1 text-xs uppercase tracking-[0.1em] text-plum-700">
                   Custom order &middot; 50% advance
@@ -53,7 +56,7 @@ export default function CartPage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setQty(item.productId, item.qty - 1)}
+                onClick={() => setQty(item.productId, item.size, item.qty - 1)}
                 className="h-8 w-8 border border-line text-ink-soft hover:border-ink hover:text-ink"
                 aria-label="Decrease quantity"
               >
@@ -62,7 +65,7 @@ export default function CartPage() {
               <span className="w-6 text-center text-sm text-ink">{item.qty}</span>
               <button
                 type="button"
-                onClick={() => setQty(item.productId, item.qty + 1)}
+                onClick={() => setQty(item.productId, item.size, item.qty + 1)}
                 className="h-8 w-8 border border-line text-ink-soft hover:border-ink hover:text-ink"
                 aria-label="Increase quantity"
               >
@@ -74,7 +77,7 @@ export default function CartPage() {
             </p>
             <button
               type="button"
-              onClick={() => removeItem(item.productId)}
+              onClick={() => removeItem(item.productId, item.size)}
               className="shrink-0 text-xs uppercase tracking-[0.1em] text-ink-soft hover:text-red-700"
             >
               Remove

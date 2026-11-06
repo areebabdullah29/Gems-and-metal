@@ -106,6 +106,7 @@ export default function CheckoutPage() {
           price: i.price,
           qty: i.qty,
           is_custom: i.isCustom,
+          size: i.size,
         })),
         totalPrice: subtotal,
         amountPaidNow,
@@ -134,6 +135,7 @@ export default function CheckoutPage() {
           <div key={item.productId} className="flex justify-between">
             <span className="text-ink-soft">
               {item.name} &times; {item.qty}
+              {item.size && <span className="ms-2 text-xs">(Size: {item.size})</span>}
               {item.isCustom && <span className="ms-2 text-xs text-plum-700">(custom)</span>}
             </span>
             <span className="text-ink">{formatPrice(item.price * item.qty)}</span>

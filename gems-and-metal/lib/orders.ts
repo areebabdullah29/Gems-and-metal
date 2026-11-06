@@ -11,6 +11,7 @@ export interface OrderItem {
   price: number;
   qty: number;
   is_custom: boolean;
+  size: string | null;
 }
 
 export interface Order {

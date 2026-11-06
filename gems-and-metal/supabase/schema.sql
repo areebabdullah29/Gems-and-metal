@@ -18,8 +18,13 @@ create table if not exists public.products (
     check (availability in ('in_stock', 'made_to_order')),
   stock integer,
   images text[] not null default '{}',
+  sizes text[] not null default '{}', -- e.g. {"6","7","8"}; empty = no size selection needed
   created_at timestamptz not null default now()
 );
+
+-- Re-run-safe: adds the column if this ran against an older database where
+-- the table already existed without it.
+alter table public.products add column if not exists sizes text[] not null default '{}';
 
 alter table public.products enable row level security;
 

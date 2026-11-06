@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda, Inter } from "next/font/google";
+import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "../globals.css";
 
-const bodoniModa = Bodoni_Moda({
+const playfairDisplay = Playfair_Display({
   variable: "--font-display-serif",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
 });
 
-const inter = Inter({
+const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <html
       lang="en"
       dir="ltr"
-      className={`${bodoniModa.variable} ${inter.variable} h-full antialiased`}
+      className={`${playfairDisplay.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">{children}</body>
     </html>

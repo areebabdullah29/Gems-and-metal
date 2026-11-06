@@ -124,7 +124,7 @@ export default function CinematicHero() {
         >
           <Link
             href="/shop"
-            className="group inline-flex items-center gap-2 bg-paper px-8 py-3.5 text-xs uppercase tracking-[0.2em] text-ink transition-colors duration-300 hover:bg-plum-300"
+            className="group inline-flex items-center gap-2 bg-paper px-8 py-3.5 text-xs uppercase tracking-[0.2em] text-ink transition-colors duration-300 hover:bg-ink hover:text-paper"
           >
             Explore the Collection
             <Arrow />

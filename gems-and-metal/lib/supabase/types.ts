@@ -22,6 +22,7 @@ export interface Database {
           availability: "in_stock" | "made_to_order";
           stock: number | null;
           images: string[];
+          sizes: string[];
           created_at: string;
         };
         Insert: {
@@ -36,6 +37,7 @@ export interface Database {
           availability?: "in_stock" | "made_to_order";
           stock?: number | null;
           images?: string[];
+          sizes?: string[];
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["products"]["Insert"]>;

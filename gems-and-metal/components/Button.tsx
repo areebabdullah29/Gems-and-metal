@@ -11,8 +11,8 @@ const base =
   "group inline-flex items-center justify-center gap-2 whitespace-nowrap px-7 py-3 text-xs uppercase tracking-[0.18em] transition-colors duration-300";
 
 const variants = {
-  primary: "bg-ink text-paper hover:bg-plum-700",
-  secondary: "border border-ink text-ink hover:border-plum-700 hover:text-plum-700",
+  primary: "bg-ink text-paper hover:bg-[#222222]",
+  secondary: "border border-ink text-ink hover:bg-ink hover:text-paper",
 };
 
 function Arrow() {
@@ -36,9 +36,10 @@ export function ButtonLink({
   children,
   variant = "primary",
   className = "",
-}: BaseProps & { href: string }) {
+  onClick,
+}: BaseProps & { href: string; onClick?: () => void }) {
   return (
-    <Link href={href} className={`${base} ${variants[variant]} ${className}`}>
+    <Link href={href} onClick={onClick} className={`${base} ${variants[variant]} ${className}`}>
       {children}
       <Arrow />
     </Link>

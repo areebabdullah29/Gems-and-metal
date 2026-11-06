@@ -1,8 +1,11 @@
 import "server-only";
 import { connection } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { MAX_PRODUCT_IMAGES } from "@/lib/constants";
 
 export type Availability = "in_stock" | "made_to_order";
+
+export { MAX_PRODUCT_IMAGES };
 
 export interface Product {
   id: string;
@@ -17,6 +20,8 @@ export interface Product {
   /** Cover image — images[0], or null if none uploaded yet. */
   image: string | null;
   images: string[];
+  /** Available sizes (e.g. ring sizes); empty means no size selection needed. */
+  sizes: string[];
   createdAt: string;
 }
 
@@ -33,6 +38,7 @@ interface ProductRow {
   availability: Availability;
   description: string;
   images: string[];
+  sizes: string[];
   created_at: string;
 }
 
@@ -49,6 +55,7 @@ function fromRow(row: ProductRow): Product {
     description: row.description,
     images: row.images ?? [],
     image: row.images?.[0] ?? null,
+    sizes: row.sizes ?? [],
     createdAt: row.created_at,
   };
 }
@@ -119,12 +126,13 @@ export interface ProductInput {
   isCustom: boolean;
   availability: Availability;
   description: string;
+  sizes: string[];
 }
 
-async function uploadImage(file: File, productId: string): Promise<string> {
+async function uploadImage(file: File, productId: string, index: number): Promise<string> {
   const db = supabaseAdmin();
   const ext = (file.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
-  const path = `${productId}/${Date.now()}.${ext}`;
+  const path = `${productId}/${Date.now()}-${index}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const { error } = await db.storage.from(PRODUCT_IMAGES_BUCKET).upload(path, buffer, {
@@ -134,6 +142,10 @@ async function uploadImage(file: File, productId: string): Promise<string> {
   if (error) throw new Error(`Failed to upload image: ${error.message}`);
 
   return db.storage.from(PRODUCT_IMAGES_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+async function uploadImages(files: File[], productId: string): Promise<string[]> {
+  return Promise.all(files.map((file, i) => uploadImage(file, productId, i)));
 }
 
 async function deleteImages(urls: string[]): Promise<void> {
@@ -149,7 +161,7 @@ async function deleteImages(urls: string[]): Promise<void> {
   if (paths.length > 0) await db.storage.from(PRODUCT_IMAGES_BUCKET).remove(paths);
 }
 
-export async function createProduct(input: ProductInput, imageFile: File | null): Promise<Product> {
+export async function createProduct(input: ProductInput, imageFiles: File[]): Promise<Product> {
   const db = supabaseAdmin();
   const slug = await uniqueSlug(input.name);
 
@@ -164,6 +176,7 @@ export async function createProduct(input: ProductInput, imageFile: File | null)
       is_custom: input.isCustom,
       availability: input.availability,
       description: input.description,
+      sizes: input.sizes,
       images: [],
     })
     .select("*")
@@ -172,38 +185,50 @@ export async function createProduct(input: ProductInput, imageFile: File | null)
   if (insertError) throw new Error(`Failed to create product: ${insertError.message}`);
 
   const row = inserted as ProductRow;
+  const validFiles = imageFiles.filter((f) => f.size > 0).slice(0, MAX_PRODUCT_IMAGES);
 
-  if (imageFile && imageFile.size > 0) {
-    const url = await uploadImage(imageFile, row.id);
+  if (validFiles.length > 0) {
+    const urls = await uploadImages(validFiles, row.id);
     const { data: updated, error: updateError } = await db
       .from("products")
-      .update({ images: [url] })
+      .update({ images: urls })
       .eq("id", row.id)
       .select("*")
       .single();
-    if (updateError) throw new Error(`Failed to attach image: ${updateError.message}`);
+    if (updateError) throw new Error(`Failed to attach images: ${updateError.message}`);
     return fromRow(updated as ProductRow);
   }
 
   return fromRow(row);
 }
 
+export interface UpdateProductImages {
+  /** Existing image URLs to remove (deleted from storage too). */
+  removeUrls: string[];
+  /** New files to upload and append. */
+  newFiles: File[];
+}
+
 export async function updateProduct(
   id: string,
   input: ProductInput,
-  imageFile: File | null
+  imageChanges: UpdateProductImages
 ): Promise<Product | null> {
   const db = supabaseAdmin();
   const existing = await getProductById(id);
   if (!existing) return null;
 
   const slug = await uniqueSlug(input.name, id);
-  let images = existing.images;
 
-  if (imageFile && imageFile.size > 0) {
-    await deleteImages(existing.images);
-    images = [await uploadImage(imageFile, id)];
-  }
+  const keptImages = existing.images.filter((url) => !imageChanges.removeUrls.includes(url));
+  const removedImages = existing.images.filter((url) => imageChanges.removeUrls.includes(url));
+  if (removedImages.length > 0) await deleteImages(removedImages);
+
+  const validFiles = imageChanges.newFiles
+    .filter((f) => f.size > 0)
+    .slice(0, Math.max(0, MAX_PRODUCT_IMAGES - keptImages.length));
+  const newUrls = validFiles.length > 0 ? await uploadImages(validFiles, id) : [];
+  const images = [...keptImages, ...newUrls];
 
   const { data: updated, error } = await db
     .from("products")
@@ -216,6 +241,7 @@ export async function updateProduct(
       is_custom: input.isCustom,
       availability: input.availability,
       description: input.description,
+      sizes: input.sizes,
       images,
     })
     .eq("id", id)

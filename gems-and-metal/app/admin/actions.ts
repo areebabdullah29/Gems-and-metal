@@ -62,6 +62,13 @@ function parseProductInput(formData: FormData): ProductInput | { error: string }
   const availability = String(formData.get("availability") ?? "in_stock") as Availability;
   const description = String(formData.get("description") ?? "").trim();
   const isCustom = formData.get("isCustom") === "on";
+  const sizesRaw = String(formData.get("sizes") ?? "").trim();
+  const sizes = sizesRaw
+    ? sizesRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
 
   if (!name) return { error: "Product name is required." };
 
@@ -73,7 +80,7 @@ function parseProductInput(formData: FormData): ProductInput | { error: string }
   if (!category) return { error: "Category is required." };
   if (!material) return { error: "Material is required." };
 
-  return { name, price, category, material, isCustom, availability, description };
+  return { name, price, category, material, isCustom, availability, description, sizes };
 }
 
 export async function createProductAction(
@@ -87,11 +94,12 @@ export async function createProductAction(
   const parsed = parseProductInput(formData);
   if ("error" in parsed) return parsed;
 
-  const imageFile = formData.get("image");
-  const image = imageFile instanceof File && imageFile.size > 0 ? imageFile : null;
+  const images = formData
+    .getAll("images")
+    .filter((f): f is File => f instanceof File && f.size > 0);
 
   try {
-    await createProduct(parsed, image);
+    await createProduct(parsed, images);
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to create product." };
   }
@@ -114,12 +122,14 @@ export async function updateProductAction(
   const parsed = parseProductInput(formData);
   if ("error" in parsed) return parsed;
 
-  const imageFile = formData.get("image");
-  const image = imageFile instanceof File && imageFile.size > 0 ? imageFile : null;
+  const newFiles = formData
+    .getAll("images")
+    .filter((f): f is File => f instanceof File && f.size > 0);
+  const removeUrls = formData.getAll("removeImages").map((v) => String(v));
 
   let updated;
   try {
-    updated = await updateProduct(id, parsed, image);
+    updated = await updateProduct(id, parsed, { removeUrls, newFiles });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to update product." };
   }

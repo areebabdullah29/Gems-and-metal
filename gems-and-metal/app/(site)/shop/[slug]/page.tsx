@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProductBySlug, listProducts } from "@/lib/products";
@@ -7,6 +6,7 @@ import { formatPrice, SITE } from "@/lib/content";
 import Reveal from "@/components/Reveal";
 import ProductCard from "@/components/ProductCard";
 import AddToCartButton from "@/components/AddToCartButton";
+import ProductGallery from "@/components/ProductGallery";
 
 export async function generateMetadata({
   params,
@@ -54,24 +54,7 @@ export default async function ProductPage({
 
       <div className="mt-8 grid gap-12 md:grid-cols-2 md:gap-16">
         <Reveal>
-          <div className="relative aspect-square overflow-hidden bg-silver-100">
-            {product.image ? (
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                sizes="(min-width: 768px) 50vw, 100vw"
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <span className="text-xs uppercase tracking-[0.2em] text-silver-500">
-                  No image yet
-                </span>
-              </div>
-            )}
-          </div>
+          <ProductGallery images={product.images} alt={product.name} />
         </Reveal>
 
         <Reveal delay={0.1}>
@@ -110,14 +93,14 @@ export default async function ProductPage({
             {SITE.contactEmail ? (
               <a
                 href={`mailto:${SITE.contactEmail}?subject=${enquirySubject}&body=${enquiryBody}`}
-                className="mt-4 inline-flex w-fit items-center justify-center gap-2 border border-ink px-7 py-3 text-xs uppercase tracking-[0.18em] text-ink transition-colors hover:border-plum-700 hover:text-plum-700"
+                className="mt-6 inline-flex w-fit items-center justify-center gap-2 border border-ink px-7 py-3 text-xs uppercase tracking-[0.18em] text-ink transition-colors hover:border-plum-700 hover:text-plum-700"
               >
                 Ask a Question
               </a>
             ) : (
               <Link
                 href="/contact"
-                className="mt-4 inline-flex w-fit items-center justify-center gap-2 border border-ink px-7 py-3 text-xs uppercase tracking-[0.18em] text-ink transition-colors hover:border-plum-700 hover:text-plum-700"
+                className="mt-6 inline-flex w-fit items-center justify-center gap-2 border border-ink px-7 py-3 text-xs uppercase tracking-[0.18em] text-ink transition-colors hover:border-plum-700 hover:text-plum-700"
               >
                 Ask a Question
               </Link>
